@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nestly – Savings Tracker</title>
+<style>
+:root{--bg:#EEF3F1;--card:#fff;--ink:#12302A;--mute:#5E7771;--line:#D5E0DC;--in:#17795A;--out:#C23F36;--accent:#0F5C4A;--onaccent:#fff;--track:#E1EAE7;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1A17;--card:#172722;--ink:#E3F0EC;--mute:#8FA9A2;--line:#27403A;--in:#4CC79C;--out:#F07A6F;--accent:#4CC79C;--onaccent:#08211A;--track:#22372F}}
+:root[data-theme="dark"]{--bg:#0E1A17;--card:#172722;--ink:#E3F0EC;--mute:#8FA9A2;--line:#27403A;--in:#4CC79C;--out:#F07A6F;--accent:#4CC79C;--onaccent:#08211A;--track:#22372F}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font:700 1.7rem/1.2 Georgia,"Times New Roman",serif;margin:0 0 4px}
+.sub{color:var(--mute);margin:0 0 18px;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{font-size:1rem;margin:0 0 12px}
+.bal{font:700 2.4rem/1.1 Georgia,serif;margin:2px 0 10px;letter-spacing:-.5px}
+.row{display:flex;gap:12px}
+.row>div{flex:1;padding:10px 12px;border-radius:10px;background:var(--bg)}
+.lbl{font-size:.8rem;color:var(--mute)}
+.in{color:var(--in);font-weight:600}.out{color:var(--out);font-weight:600}
+.bar{height:10px;background:var(--track);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:6px;transition:width .4s}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.seg button{flex:1;padding:10px;border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--onaccent);font-weight:600}
+label{display:block;font-size:.85rem;color:var(--mute);margin-bottom:10px}
+input,select,textarea{width:100%;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;padding:12px;border:0;border-radius:10px;background:var(--accent);color:var(--onaccent);font:inherit;font-weight:600;cursor:pointer}
+.btn.small{width:auto;padding:8px 14px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cat{margin-bottom:10px}.cat .top{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:4px}
+.cat .bar i{background:var(--out)}
+.tx{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.tx:first-of-type{border-top:0}
+.tx .m{flex:1;min-width:0}.tx .m b{display:block;font-weight:600}
+.tx .m span{font-size:.82rem;color:var(--mute);overflow-wrap:anywhere}
+.del{border:0;background:transparent;color:var(--mute);font-size:1.2rem;cursor:pointer;padding:4px 8px}
+.empty{color:var(--mute);text-align:center;padding:12px 0;margin:0}
+.head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.head input{width:auto;margin:0}
+.goalrow{display:flex;gap:8px;margin-top:12px}.goalrow input{margin:0}
+.tools{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.tools button{border:1px solid var(--line);background:transparent;color:var(--mute);border-radius:8px;padding:6px 12px;font:inherit;font-size:.85rem;cursor:pointer}
+.qrrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.qrbtn{flex:1;display:flex;align-items:center;gap:12px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.qrbtn img{width:44px;height:44px;object-fit:cover;border-radius:6px;background:#fff}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));z-index:20}
+.ov[hidden]{display:none}
+.ovc{background:#fff;color:#12302A;border-radius:14px;padding:16px;max-width:420px;width:100%;text-align:center}
+.ovc img{display:block;width:100%;max-height:65vh;object-fit:contain;background:#fff;margin:10px 0 14px}
+</style>
+</head>
+<body>
+<main>
+<h1>Nestly</h1>
+<p class="sub">Track money in and out, see where it goes, and work toward a savings goal.</p>
+
+<section class="card" aria-label="Summary">
+  <div class="lbl">Current savings balance</div>
+  <div class="bal" id="bal">RM 0.00</div>
+  <div class="row">
+    <div><div class="lbl">Income this month</div><div class="in" id="mIn">RM 0.00</div></div>
+    <div><div class="lbl">Spending this month</div><div class="out" id="mOut">RM 0.00</div></div>
+  </div>
+</section>
+
+<section class="card" aria-label="Savings goal">
+  <h2>Savings goal</h2>
+  <div class="bar"><i id="gBar" style="width:0%"></i></div>
+  <p class="lbl" id="gTxt" style="margin:8px 0 0">Set a goal to start tracking your progress.</p>
+  <div class="goalrow">
+    <input id="goal" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Goal (RM)" aria-label="Savings goal in RM">
+    <button class="btn small" id="setGoal">Save</button>
+  </div>
+</section>
+
+<section class="card" aria-label="Add a record">
+  <h2>Add a record</h2>
+  <div class="seg" role="group" aria-label="Record type">
+    <button type="button" id="tOut" aria-pressed="true">Money out</button>
+    <button type="button" id="tIn" aria-pressed="false">Money in</button>
+  </div>
+  <div class="g2">
+    <label>Amount (RM)<input id="amt" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00"></label>
+    <label>Date<input id="date" type="date"></label>
+  </div>
+  <label>Category<select id="cat"></select></label>
+  <label>Note (optional)<input id="note" type="text" maxlength="60" placeholder="e.g. lunch with friends"></label>
+  <button class="btn" id="add">Add record</button>
+  <p class="lbl" id="msg" role="status" style="margin:8px 0 0;min-height:1.2em"></p>
+</section>
+
+<section class="card" aria-label="Where your money goes">
+  <div class="head"><h2 style="margin:0">Where your money goes</h2><input id="month" type="month" aria-label="Choose month"></div>
+  <div id="cats" style="margin-top:14px"></div>
+</section>
+
+<section class="card" aria-label="Recent records">
+  <h2>Recent records</h2>
+  <div id="list"></div>
+</section>
+
+<section class="card" aria-label="My payment QR codes">
+  <h2>My payment QR codes</h2>
+  <p class="lbl" style="margin:0 0 12px">Save a screenshot of your DuitNow or e-wallet QR so it is one tap away when you need it.</p>
+  <div id="qrs"></div>
+  <label style="margin-top:12px">Name<input id="qrName" type="text" maxlength="30" placeholder="e.g. DuitNow (Maybank)"></label>
+  <input id="qrFile" type="file" accept="image/*" hidden>
+  <button class="btn small" id="qrPick">Choose QR image</button>
+  <p class="lbl" id="qrMsg" role="status" style="margin:8px 0 0;min-height:1.2em"></p>
+</section>
+<div id="qrView" class="ov" hidden role="dialog" aria-modal="true" aria-label="Payment QR code">
+  <div class="ovc"><b id="qrTitle"></b><img id="qrImg" alt="Payment QR code"><button class="btn" id="qrClose">Close</button></div>
+</div>
+
+<section class="card" aria-label="Backup and restore">
+  <h2>Backup and restore</h2>
+  <p class="lbl" style="margin:0 0 8px">Full backup: records, savings goal and QR codes. Use this when you change phone.</p>
+  <div class="tools" style="justify-content:flex-start;flex-wrap:wrap;margin:0 0 16px">
+    <button id="bkExp">Export backup</button><button id="bkImp">Import backup</button>
+  </div>
+  <input id="bkFile" type="file" accept=".json,application/json,text/plain" hidden>
+  <p class="lbl" style="margin:0 0 8px">Records only (CSV)</p>
+  <div class="tools" style="justify-content:flex-start;flex-wrap:wrap;margin:0 0 12px">
+    <button id="exp">Copy CSV</button><button id="dl">Download CSV</button><button id="pick">Choose CSV file</button>
+  </div>
+  <input id="file" type="file" accept=".csv,text/csv,text/plain" hidden>
+  <label>Or paste CSV data here<textarea id="paste" rows="3" placeholder="date,type,category,amount,note"></textarea></label>
+  <button class="btn small" id="imp">Import data</button>
+  <p class="lbl" id="msg2" role="status" style="margin:8px 0 0;min-height:1.2em"></p>
+</section>
+<div class="tools"><button id="reset">Delete all</button></div>
+</main>
+
+<script>
+(function(){
+var KEY="duitaku:v1";
+var CATS={out:["Food & drinks","Transport","Fees & books","Entertainment","Bills & phone","Other"],in:["Allowance / loan","Part-time pay","Gifts","Other"]};
+var LEGACY={"Makan & minum":"Food & drinks","Pengangkutan":"Transport","Yuran & buku":"Fees & books","Hiburan":"Entertainment","Bil & telefon":"Bills & phone","Lain-lain":"Other","Duit saku / PTPTN":"Allowance / loan","Gaji kerja sampingan":"Part-time pay","Hadiah":"Gifts"};
+var S={tx:[],goal:0},type="out",armed=false;
+function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&Array.isArray(d.tx)){S=d;S.tx.forEach(function(t){if(LEGACY[t.cat])t.cat=LEGACY[t.cat]})}}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var $=function(i){return document.getElementById(i)};
+function rm(n){return "RM "+n.toLocaleString("en-MY",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fillCats(){$("cat").innerHTML=CATS[type].map(function(c){return "<option>"+esc(c)+"</option>"}).join("")}
+function setType(t){type=t;$("tOut").setAttribute("aria-pressed",t==="out");$("tIn").setAttribute("aria-pressed",t==="in");fillCats()}
+function render(){
+  var inAll=0,outAll=0,m=$("month").value,mi=0,mo=0,by={};
+  S.tx.forEach(function(t){
+    if(t.type==="in")inAll+=t.amt;else outAll+=t.amt;
+    if(t.date.slice(0,7)===m){if(t.type==="in")mi+=t.amt;else{mo+=t.amt;by[t.cat]=(by[t.cat]||0)+t.amt}}
+  });
+  var bal=inAll-outAll;
+  $("bal").textContent=rm(bal);$("bal").style.color=bal<0?"var(--out)":"";
+  $("mIn").textContent=rm(mi);$("mOut").textContent=rm(mo);
+  if(S.goal>0){var p=Math.max(0,Math.min(100,bal/S.goal*100));$("gBar").style.width=p+"%";
+    $("gTxt").textContent=bal>=S.goal?"Goal reached! Your balance is above "+rm(S.goal)+".":rm(Math.max(bal,0))+" of "+rm(S.goal)+" ("+p.toFixed(0)+"%). "+rm(S.goal-Math.max(bal,0))+" to go."}
+  else{$("gBar").style.width="0%";$("gTxt").textContent="Set a goal to start tracking your progress."}
+  var keys=Object.keys(by).sort(function(a,b){return by[b]-by[a]});
+  $("cats").innerHTML=keys.length?keys.map(function(k){var pc=mo?by[k]/mo*100:0;
+    return '<div class="cat"><div class="top"><span>'+esc(k)+'</span><span>'+rm(by[k])+' ('+pc.toFixed(0)+'%)</span></div><div class="bar"><i style="width:'+pc+'%"></i></div></div>'}).join(""):'<p class="empty">No spending recorded for this month.</p>';
+  var rows=S.tx.slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id}).slice(0,30);
+  $("list").innerHTML=rows.length?rows.map(function(t){
+    return '<div class="tx"><div class="m"><b>'+esc(t.cat)+'</b><span>'+t.date+(t.note?", "+esc(t.note):"")+'</span></div><div class="'+t.type+'">'+(t.type==="in"?"+":"−")+rm(t.amt)+'</div><button class="del" data-id="'+t.id+'" aria-label="Delete record">×</button></div>'}).join(""):'<p class="empty">No records yet. Add your first one above.</p>';
+}
+$("tOut").onclick=function(){setType("out")};
+$("tIn").onclick=function(){setType("in")};
+$("add").onclick=function(){
+  var a=parseFloat($("amt").value);
+  if(!(a>0)){$("msg").textContent="Enter an amount greater than 0.";$("amt").focus();return}
+  S.tx.push({id:Date.now(),type:type,amt:Math.round(a*100)/100,cat:$("cat").value,note:$("note").value.trim(),date:$("date").value||today()});
+  save();$("amt").value="";$("note").value="";$("msg").textContent="Record added.";
+  if($("date").value)$("month").value=$("date").value.slice(0,7);
+  render();
+};
+$("list").onclick=function(e){var id=e.target.getAttribute&&e.target.getAttribute("data-id");if(!id)return;
+  S.tx=S.tx.filter(function(t){return String(t.id)!==id});save();render()};
+$("setGoal").onclick=function(){S.goal=Math.max(0,parseFloat($("goal").value)||0);save();render()};
+$("month").onchange=render;
+function toCSV(){return "date,type,category,amount,note\n"+S.tx.map(function(t){return [t.date,t.type==="in"?"income":"expense",'"'+t.cat.replace(/"/g,'""')+'"',t.amt,'"'+t.note.replace(/"/g,'""')+'"'].join(",")}).join("\n")}
+function parseCSV(t){var rows=[],r=[],f="",q=false,i,c;
+  for(i=0;i<t.length;i++){c=t[i];
+    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;
+    else if(c===","){r.push(f);f=""}
+    else if(c==="\n"||c==="\r"){if(c==="\r"&&t[i+1]==="\n")i++;r.push(f);rows.push(r);r=[];f=""}
+    else f+=c}
+  if(f!==""||r.length){r.push(f);rows.push(r)}
+  return rows}
+function doImport(text){
+  var rows=parseCSV(text.replace(/^\uFEFF/,"")),added=0,skipped=0,seen={};
+  S.tx.forEach(function(t){seen[[t.date,t.type,t.cat,t.amt,t.note].join("|")]=1});
+  rows.forEach(function(r,i){
+    if(i===0&&/tarikh|date/i.test(r[0]))return;
+    if(r.length<4)return;
+    var date=(r[0]||"").trim(),ty=(r[1]||"").trim().toLowerCase(),cat=(r[2]||"").trim(),amt=Math.round(parseFloat(r[3])*100)/100,note=(r[4]||"").trim();
+    var tt=/^(income|in|masuk)$/.test(ty)?"in":/^(expense|out|keluar)$/.test(ty)?"out":"";
+    if(LEGACY[cat])cat=LEGACY[cat];
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!tt||!cat||!(amt>0)){skipped++;return}
+    var k=[date,tt,cat,amt,note].join("|");
+    if(seen[k]){skipped++;return}
+    seen[k]=1;S.tx.push({id:Date.now()+added,type:tt,amt:amt,cat:cat,note:note,date:date});added++});
+  save();render();
+  $("msg2").textContent=added+" record"+(added===1?"":"s")+" imported"+(skipped?", "+skipped+" skipped (invalid or already there).":".")}
+$("exp").onclick=function(){
+  var ok=function(){$("msg2").textContent="CSV copied. Paste it into Notes, Excel or Sheets to keep a backup."};
+  try{navigator.clipboard.writeText(toCSV()).then(ok,function(){$("msg2").textContent="Could not copy. Try again."})}catch(e){$("msg2").textContent="Could not copy."}
+};
+$("dl").onclick=function(){
+  try{var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([toCSV()],{type:"text/csv"}));a.download="nestly.csv";document.body.appendChild(a);a.click();a.remove();$("msg2").textContent="nestly.csv downloaded."}
+  catch(e){$("msg2").textContent="Download is not available here. Use Copy CSV instead."}
+};
+$("pick").onclick=function(){$("file").click()};
+$("file").onchange=function(){var f=this.files&&this.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){doImport(String(rd.result))};rd.readAsText(f);this.value=""};
+$("imp").onclick=function(){var v=$("paste").value.trim();if(!v){$("msg2").textContent="Paste your CSV data first.";return}doImport(v);$("paste").value=""};
+$("reset").onclick=function(){
+  if(!armed){armed=true;$("reset").textContent="Tap again to confirm";setTimeout(function(){armed=false;$("reset").textContent="Delete all"},3000);return}
+  S={tx:[],goal:0};armed=false;save();$("goal").value="";$("reset").textContent="Delete all";render()};
+load();
+$("date").value=today();$("month").value=today().slice(0,7);
+if(S.goal)$("goal").value=S.goal;
+var QK="pennyjar:qr",Q=[];
+function qLoad(){try{var r=localStorage.getItem(QK);if(r){var d=JSON.parse(r);if(Array.isArray(d))Q=d}}catch(e){}}
+function qSave(){try{localStorage.setItem(QK,JSON.stringify(Q));return true}catch(e){return false}}
+function qRender(){$("qrs").innerHTML=Q.length?Q.map(function(q){return '<div class="qrrow"><button class="qrbtn" data-qr="'+q.id+'"><img src="'+q.img+'" alt=""><span>'+esc(q.name)+'</span></button><button class="del" data-qdel="'+q.id+'" aria-label="Delete '+esc(q.name)+'">×</button></div>'}).join(""):'<p class="empty">No QR codes saved yet.</p>'}
+$("qrs").onclick=function(e){var b=e.target.closest("[data-qr],[data-qdel]");if(!b)return;
+  var del=b.getAttribute("data-qdel"),id=del||b.getAttribute("data-qr");
+  if(del){Q=Q.filter(function(q){return String(q.id)!==del});qSave();qRender();return}
+  var q=Q.filter(function(x){return String(x.id)===id})[0];if(!q)return;
+  $("qrTitle").textContent=q.name;$("qrImg").src=q.img;$("qrView").hidden=false;$("qrClose").focus()};
+$("qrClose").onclick=function(){$("qrView").hidden=true;$("qrImg").removeAttribute("src")};
+$("qrView").onclick=function(e){if(e.target===this)$("qrClose").onclick()};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("qrView").hidden)$("qrClose").onclick()});
+$("qrPick").onclick=function(){$("qrFile").click()};
+$("qrFile").onchange=function(){
+  var f=this.files&&this.files[0];this.value="";if(!f)return;
+  var name=$("qrName").value.trim()||"My QR";
+  var rd=new FileReader();
+  rd.onerror=function(){$("qrMsg").textContent="Could not read that image."};
+  rd.onload=function(){var im=new Image();
+    im.onerror=function(){$("qrMsg").textContent="That file is not a usable image."};
+    im.onload=function(){
+      var sc=Math.min(1,720/Math.max(im.width,im.height)),c=document.createElement("canvas");
+      c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+      var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+      var u=c.toDataURL("image/png");if(u.length>600000)u=c.toDataURL("image/jpeg",.88);
+      Q.push({id:Date.now(),name:name,img:u});
+      if(qSave()){$("qrMsg").textContent="QR saved. Tap its name to show it.";$("qrName").value=""}
+      else{Q.pop();$("qrMsg").textContent="Not enough storage to save this image."}
+      qRender()};
+    im.src=String(rd.result)};
+  rd.readAsDataURL(f)};
+function bkFile(){return new File([JSON.stringify({app:"nestly",version:1,exported:today(),goal:S.goal,tx:S.tx,qr:Q})],"nestly-backup-"+today()+".json",{type:"application/json"})}
+function dlBk(f){try{var a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();$("msg2").textContent=f.name+" downloaded. Keep it somewhere safe."}catch(e){$("msg2").textContent="Download is not available here."}}
+$("bkExp").onclick=function(){
+  var f;try{f=bkFile()}catch(e){$("msg2").textContent="Backup is not supported in this browser.";return}
+  if(navigator.canShare&&navigator.canShare({files:[f]})){
+    navigator.share({files:[f],title:"Nestly backup"}).then(function(){$("msg2").textContent="Backup shared. Keep it somewhere safe."},function(e){if(e&&e.name!=="AbortError")dlBk(f)});return}
+  dlBk(f)};
+$("bkImp").onclick=function(){$("bkFile").click()};
+$("bkFile").onchange=function(){
+  var f=this.files&&this.files[0];this.value="";if(!f)return;
+  var rd=new FileReader();
+  rd.onerror=function(){$("msg2").textContent="Could not read that file."};
+  rd.onload=function(){
+    var d;try{d=JSON.parse(String(rd.result))}catch(e){$("msg2").textContent="That is not a valid backup file.";return}
+    if(!d||!Array.isArray(d.tx)){$("msg2").textContent="That is not a Nestly backup file.";return}
+    var seen={},added=0,qa=0;
+    S.tx.forEach(function(t){seen[[t.date,t.type,t.cat,t.amt,t.note].join("|")]=1});
+    d.tx.forEach(function(t){
+      if(!t||!/^\d{4}-\d{2}-\d{2}$/.test(t.date)||(t.type!=="in"&&t.type!=="out")||!(Number(t.amt)>0)||!t.cat)return;
+      var amt=Math.round(Number(t.amt)*100)/100,note=String(t.note||""),cat=String(t.cat),k=[t.date,t.type,cat,amt,note].join("|");
+      if(seen[k])return;seen[k]=1;
+      S.tx.push({id:Date.now()+added,type:t.type,amt:amt,cat:cat,note:note,date:t.date});added++});
+    if(!(S.goal>0)&&Number(d.goal)>0)S.goal=Number(d.goal);
+    if(Array.isArray(d.qr)){d.qr.forEach(function(q){
+      if(!q||typeof q.img!=="string"||!/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(q.img))return;
+      if(Q.some(function(x){return x.img===q.img}))return;
+      Q.push({id:Date.now()+1000+qa,name:String(q.name||"My QR").slice(0,30),img:q.img});qa++})}
+    save();var ok=qSave();
+    if(S.goal)$("goal").value=S.goal;
+    render();qRender();
+    $("msg2").textContent="Restored "+added+" record"+(added===1?"":"s")+" and "+qa+" QR code"+(qa===1?"":"s")+"."+(ok?"":" Some QR images did not fit in storage.")};
+  rd.readAsText(f)};
+qLoad();qRender();
+fillCats();render();
+})();
+</script>
+</body>
+</html>
